@@ -70,12 +70,15 @@ class CreateDicomTest(sparktk_test.SparkTKTestCase):
         for filename in sorted([f for f in os.listdir(self.image_directory)]):
             pixel_data = dicom.read_file(self.image_directory + filename).pixel_array
             files.append(pixel_data)
+        files = sorted(files)
 
         # iterate through the data in the files and in the dicom frame
         # and ensure that they match
-        image_pandas = self.dicom.pixeldata.to_pandas()
-        
-        self.assertItemsEqual(image_pandas["imagematrix"], files)
+        image_pandas = self.dicom.pixeldata.to_pandas()["imagematrix"]
+        image_pandas = sorted(image_pandas) 
+
+        for dicom_item, file_item in zip(image_pandas["imagematrix"], files):
+            self.assertEqual(dicom_item, file_item)
 
     def test_import_dicom_invalid_files(self):
         """tests import dicom with invalid data"""
